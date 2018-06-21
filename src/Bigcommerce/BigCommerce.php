@@ -4,23 +4,19 @@ namespace VerveCommerce\Bigcommerce;
 
 use Bigcommerce\Api\Connection as ApiConnection;
 use Bigcommerce\Api\Client as ApiClient;
-use Exceptions\BigcommerceApiException;
-
+use VerveCommerce\Bigcommerce\Exceptions\BigcommerceApiException;
 
 class Bigcommerce
 {
+    public $connection;
+    public $client;
     protected $clientId;
     protected $clientSecret;
     protected $storeHash;
     protected $accessToken;
-
-    protected $connection;
-    protected $client;
     protected $version;
-    protected $authServiceUrl = "https://login.bigcommerce.com/";
     protected $baseApiUrl = "https://api.bigcommerce.com/";
     protected $redirectUrl;
-    protected $resourceUri;
 
     public function __construct()
     {
@@ -37,9 +33,14 @@ class Bigcommerce
 
         $this->clientId = config('bigcommerce.client_id');
         $this->clientSecret = config('bigcommerce.client_secret');
-        $this->redirectUrl = config('bigcommerce.redirect_url');
 
         $this->connection->addHeader("X-Auth-Client", $this->clientId);
+
+        ApiClient::configure([
+            'client_id' => $this->clientId,
+            'auth_token' => $this->accessToken,
+            'store_hash' => $this->storeHash
+        ]);
     }
 
     /*
@@ -65,10 +66,13 @@ class Bigcommerce
         return $this;
     }
 
-    /*
-     *  $args[0] is for route uri and $args[1] is either request body or query strings
+    /**
+     *  Proxy calls to the BigCommerce API.
+     *
+     * Generic methods (get, post, put, delete) get passed to the underlying
+     * Connection class while all other methods are proxied to the Client
+     * class.
      */
-
     public function __call($method, $args)
     {
         if (in_array($method, ['get', 'post', 'put', 'delete'])) {
@@ -80,11 +84,11 @@ class Bigcommerce
 
     public function makeBasicRequest($httpVerb, $resource, $filters = null)
     {
-        dump($this->resourceUri($resource));
         try {
             $data = $this->connection->$httpVerb($this->resourceUri($resource), $filters);
 
-            if ($retryAfter = $this->connection->getHeader("X-Retry-After") &&
+            // Recursively attempt to retry.
+            if (($retryAfter = $this->connection->getHeader("X-Retry-After")) &&
                 $retryAfter > 0) {
                 sleep($retryAfter + 5);
                 return $this->makeBasicRequest($httpVerb, $resource, $filters);
@@ -102,47 +106,16 @@ class Bigcommerce
 
     public function resourceUri($resource)
     {
-        $this->resourceUri = $this->baseApiUrl . "stores/" . $this->storeHash . "/{$this->version}/" . $resource;
-
-        return $this->resourceUri;
+        return $this->baseApiUrl . "stores/" . $this->storeHash . "/{$this->version}/" . $resource;
     }
 
     public function proxyClientRequest($method, $args)
     {
         try {
-            ApiClient::configure([
-                'client_id' => $this->clientId,
-                'auth_token' => $this->accessToken,
-                'store_hash' => $this->storeHash
-            ]);
-
-            $data = call_user_func_array([ApiClient::class, $method], $args);
-
-            return $data;
+            return call_user_func_array([ApiClient::class, $method], $args);
         } catch (Exception $e) {
             throw new BigcommerceApiException($e->getMessage(), $e->getCode());
         }
     }
-
-    public function addHeader($key, $value)
-    {
-        $this->connection->addHeader($key, $value);
-        return $this;
-    }
-
-    public function getStatus()
-    {
-        return $this->connection->getStatus();
-    }
-
-    public function getHeaders()
-    {
-        return $this->connection->getHeaders();
-    }
-
-    public function getHeader($header)
-    {
-        return $this->connection->getheader($header);
-    }
-
+    
 }
