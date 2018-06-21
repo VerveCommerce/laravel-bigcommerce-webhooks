@@ -1,6 +1,6 @@
 <?php
 
-namespace VerveCommerce\Bigcommerce;
+namespace VerveCommerce\Bigcommerce\Providers;
 
 use Config;
 use Illuminate\Support\ServiceProvider;

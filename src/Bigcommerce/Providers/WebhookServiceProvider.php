@@ -1,6 +1,6 @@
 <?php
 
-namespace VerveCommerce\Bigcommerce;
+namespace VerveCommerce\Bigcommerce\Providers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -29,16 +29,6 @@ class WebhookServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->loadRoutesFrom(__DIR__.'/routes.php');
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
+        $this->loadRoutesFrom(__DIR__ . '/routes.php');
     }
 }
