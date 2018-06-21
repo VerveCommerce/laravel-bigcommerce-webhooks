@@ -19,10 +19,10 @@ Require the package in your project:
 
 Before getting started, you'll need to configure the integration. Here is the configuration stub for your `.env` file:
 
-    BIGCOMMERCE_CLIENT_ID=a6t18jv7evll0s8m77jx0qitc8q0ecr
-    BIGCOMMERCE_CLIENT_SECRET=5ay6wbemr44a8bngnp0ut2m5xf8qewi
-    BIGCOMMERCE_STORE_HASH=mj8zesutwp
-    BIGCOMMERCE_ACCESS_TOKEN=607h4d4fxk6nupvjycyjodr5j1sd55i
+    BIGCOMMERCE_CLIENT_ID=
+    BIGCOMMERCE_CLIENT_SECRET=
+    BIGCOMMERCE_STORE_HASH=
+    BIGCOMMERCE_ACCESS_TOKEN=
     BIGCOMMERCE_API_VERSION=v2
     BIGCOMMERCE_NGROK_URL=
     BIGCOMMERCE_WEBHOOK_SECRET=
