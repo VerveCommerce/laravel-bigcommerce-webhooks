@@ -2,8 +2,8 @@
 
 namespace VerveCommerce\Bigcommerce\Providers;
 
-use Config;
 use Illuminate\Support\ServiceProvider;
+use VerveCommerce\Bigcommerce\Bigcommerce;
 
 class BigcommerceServiceProvider extends ServiceProvider
 {
