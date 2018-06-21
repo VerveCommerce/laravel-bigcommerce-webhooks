@@ -39,7 +39,7 @@ class Bigcommerce
         $this->clientSecret = config('bigcommerce.client_secret');
         $this->redirectUrl = config('bigcommerce.redirect_url');
 
-        $this->connection->addHeader("X-Auth-Client", $this->clientId );
+        $this->connection->addHeader("X-Auth-Client", $this->clientId);
     }
 
     /*
@@ -51,12 +51,6 @@ class Bigcommerce
         return $this;
     }
 
-    public function setApiVersion($version)
-    {
-        $this->version = $version;
-        return $this;
-    }
-
     public function setAccessToken($accessToken)
     {
         return tap($this, function ($bc) use ($accessToken) {
@@ -65,9 +59,16 @@ class Bigcommerce
         });
     }
 
+    public function setApiVersion($version)
+    {
+        $this->version = $version;
+        return $this;
+    }
+
     /*
      *  $args[0] is for route uri and $args[1] is either request body or query strings
      */
+
     public function __call($method, $args)
     {
         if (in_array($method, ['get', 'post', 'put', 'delete'])) {
@@ -99,11 +100,18 @@ class Bigcommerce
         }
     }
 
+    public function resourceUri($resource)
+    {
+        $this->resourceUri = $this->baseApiUrl . "stores/" . $this->storeHash . "/{$this->version}/" . $resource;
+
+        return $this->resourceUri;
+    }
+
     public function proxyClientRequest($method, $args)
     {
         try {
             ApiClient::configure([
-                'client_id'  => $this->clientId,
+                'client_id' => $this->clientId,
                 'auth_token' => $this->accessToken,
                 'store_hash' => $this->storeHash
             ]);
@@ -116,23 +124,10 @@ class Bigcommerce
         }
     }
 
-    public function resourceUri($resource)
-    {
-        $this->resourceUri = $this->baseApiUrl . "stores/" . $this->storeHash . "/{$this->version}/" . $resource;
-
-        return $this->resourceUri;
-    }
-
     public function addHeader($key, $value)
     {
         $this->connection->addHeader($key, $value);
-
         return $this;
-    }
-
-    public function removeHeader($header)
-    {
-        $this->connection->remove($header);
     }
 
     public function getStatus()

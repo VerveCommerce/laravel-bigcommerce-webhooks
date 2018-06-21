@@ -3,7 +3,7 @@
 namespace VerveCommerce\Bigcommerce;
 
 use VerveCommerce\Bigcommerce\Exceptions\BigcommerceApiException;
-use \VerveCommerce\Bigcommerce\Facades\Bigcommerce;
+use VerveCommerce\Bigcommerce\Facades\Bigcommerce;
 
 class Webhooks
 {
