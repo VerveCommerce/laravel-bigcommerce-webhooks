@@ -26,7 +26,7 @@ must be in your path.
 
 Require the package in your project:
 
-    composer require vervecommerce/laravel-bigcommerce
+    composer require vervecommerce/laravel-bigcommerce-webhooks
 
 ## Configuration
 
