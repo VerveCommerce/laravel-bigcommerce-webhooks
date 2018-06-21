@@ -1,236 +1,115 @@
-# Laravel Bigcommerce
+# Laravel BigCommerce Webhook Quickstart
 
-Laravel Bigcommerce is a simple package which helps to build robust integration into bigcommerce.
-This package support the Version 2 and 3 of the Bigcommerce Api.
+This package is a kickstart-style package for Laravel which makes rapidly building and locally
+developing Webhook-focused integrations.
+
+## Work in Progress
+
+This module is a work in progress. Stuff might changes—potentially even drastically.
+
+### TODOs
+
+* Clean up the URL handling to make go-live work better.
+* Eventify the webhook callback.
+* Enable queues for processing webhook callbacks.
+* Automate more of the installation (`.env.example` support)
+* Move webhook route registration into `routes.php` (similar to auth).
+* Got any ideas?
+
+## Prerequisites
+
+This package assumes you have [`ngrok`][0] installed. You only a free account in order
+to take advantage of this package. The `ngrok` command line application must be installed and
+must be in your path.
 
 ## Installation
 
-Add package to composer.json
+Require the package in your project:
 
-    composer require oseintow/laravel-bigcommerce
-
-Add the service provider to config/app.php in the providers array.
-
-```php5
-<?php
-
-'providers' => [
-    ...
-    Oseintow\Bigcommerce\BigcommerceServiceProvider::class,
-],
-```
-
-Setup alias for the Facade
-
-```php5
-<?php
-
-'aliases' => [
-    ...
-    'Bigcommerce' => Oseintow\Bigcommerce\Facades\Bigcommerce::class,
-],
-```
+    composer require vervecommerce/laravel-bigcommerce
 
 ## Configuration
 
-Laravel Bigcommerce requires connection configuration. You will need to publish vendor assets
+Before getting started, you'll need to configure the integration. Here is the configuration stub for your `.env` file:
+
+    BIGCOMMERCE_CLIENT_ID=
+    BIGCOMMERCE_CLIENT_SECRET=
+    BIGCOMMERCE_STORE_HASH=
+    BIGCOMMERCE_ACCESS_TOKEN=
+    BIGCOMMERCE_API_VERSION=v2
+    BIGCOMMERCE_NGROK_URL=
+    BIGCOMMERCE_WEBHOOK_SECRET=
+
+You'll also want to publish the configuration file:
 
     php artisan vendor:publish
 
-This will create a bigcommerce.php file in the config directory. You will need to set your **auth** keys
+This will create a `config/bigcommerce.php` file in the config directory. If you need more information about the config,
+there is plenty of documentation in the config file itself.
 
-#### OAUTH
+And then generate a secret key:
 
-Set **CLIENT ID** , **CLIENT SECRET** AND **REDIRECT URL**
+    php artisan bigcommerce:generate-key
 
-#### BasicAuth
+The secret key is used by the webhook endpoint to validate that the webhook is legitimate.
 
-Set **API_KEY** , **USERNAME** AND **STORE URL**
+## oAuth
 
-Let's retrieve access token
+This module only supports oAuth since it's the only method where webhooks are supported.
 
-```php5
-Route::get("process_oauth_result",function(\Illuminate\Http\Request $request)
-{
-    $response = Bigcommerce::getAccessToken($request->code, $request->scope, $request->context));
-
-    dd($response);
-});
-```
+BigCommerce also seems to be indicating that support for Basic Auth will be deprecated in the future.
 
 ## Usage
 
-There are 2 ways to access resource from bigcommerce using this package.
+### Accessing the BigCommerce API
 
-1. Using the http verbs(ie. this gives you more flexibility and also support api v3 and also returns laravel collection)
-2. Using Bigcommerce Collection (this does not support api v3 and laravel collection).
-
-By default the package support **API v3**
-
-To set it to version 2 or 3 use
+This package exposes a Facade called `BigCommerce` which proxies calls to either HTTP verbs
+(GET, PUT, POST, DELETE) or to Bigcommerce API Client calls themselves. For instance:
 
 ```php5
-Bigcommerce::setApiVersion('v2');
+Bigcommerce::get('time'); // Returns a collection object.
+Bigcommerce::getTime(); // Returns a DateTime, per the Client.
 ```
 
-or
+### Local Webhook Development
 
-```php5
-Bigcommerce::setApiVersion('v3');
-```
+Using ngrok, one can tunnel a secure endpoint to a local development machine, making building
+and testing webhooks locally much more developer-friendly. To facilitate this, a new artisan
+command, with a few other pieces of configuration make setting this up a snap.
 
-## Using Http verbs
+The only real requirement is that you have `ngrok` already installed on your machine and
+somewhere within your `$PATH`. Once you have that, just run:
 
-```php5
-Bigcommerce::get("resource uri",["query string params"]);
-Bigcommerce::post("resource uri",["post body"]);
-Bigcommerce::put("resource uri",["put body"]);
-Bigcommerce::delete("resource uri");
-```
+    $ php artisan ngrok-serve
 
-Let use our access token to get products from bigcommerce.
+This will start an `ngrok` process and also run `php artisan serve` in the background. It
+will also update a local `.env` value for the ngrok URL which, will be used when creating
+new webhooks with BigCommerce.
 
-**NB:** You can use this to access any resource on bigcommerce (be it Products, Shops, Orders, etc).
-And also you dont need store hash and access token when using basic auth.
+### Creating and Managing Webhooks
 
-```php5
-$storeHash = "ecswer";
-$accessToken = "xxxxxxxxxxxxxxxxxxxxx";
-$products = Bigcommerce::setStoreHash($storeHash)->setAccessToken($accessToken)->get("products");
-```
+There are several new artisan commands for creating and managing webhooks:
 
-To pass query params
-
-```php5
-// returns Collection
-$bigcommerce = Bigcommerce::setStoreHash($storeHash)->setAccessToken($accessToken);
-$products = $bigcommerce->get("admin/products.json", ["limit"=>20, "page" => 1]);
-```
-
-## Controller Example
-
-If you prefer to use dependency injection over facades like me, then you can inject the Class:
-
-```php5
-use Illuminate\Http\Request;
-use Oseintow\Bigcommerce\Bigcommerce;
-
-class Foo
-{
-    protected $bigcommerce;
-
-    public function __construct(Bigcommerce $bigcommerce)
-    {
-        $this->bigcommerce = $bigcommerce;
-    }
-
-    /*
-    * returns Collection
-    */
-    public function getProducts(Request $request)
-    {
-        $products = $this->bigcommerce->setStoreHash($storeHash)
-            ->setAccessToken($accessToken)
-            ->get('products');
-
-        $products->each(function($product){
-             \Log::info($product->title);
-        });
-    }
-}
-```
+* `bigcommerce:create-webhook` - Creates a webhook.
+* `bigcommerce:disable-webhook` - Disables or deletes a webhook.
+* `bigcommerce:list-webhooks` - Retrieves and displays configured webhooks and properties.
+* `bigcommerce:update-webhooks` - Performs batch updates to webhooks.
 
 ## Miscellaneous
 
-To get Response headers
+This class is loosely based off of [`laravel/big-commerce`](https://github.com/oseintow/laravel-bigcommerce). However,
+so much was changed, this is simply becoming a new project. You can access the `connection` and `client` classes by
+doing:
 
-```php5
-Bigcommerce::getHeaders();
+```
+BigCommerce::$connection; // Gets the connection instance.
+\Bigcommerce\Api\Client; // Static class.
 ```
 
-To get specific header
-```php5
-Bigcommerce::getHeader("Content-Type");
-```
+## Please Refer to BigCommerce API Docs
 
-To get response status code or status message
-```php5
-Bigcommerce::getStatus(); // 200
-```
+Again, since this Facade wraps the [BigCommerce PHP API][1], you should refer to that code base for better examples
+and documentation.
 
-## Using Bigcommerce Collection
-
-#### Testing Configuration
-
-Use code below To test if configuration is correct. Returns false if unsuccessful otherwise return DateTime Object.
-
-```php5
-$time = Bigcommerce::getTime();
-```
-
-### Accessing Resources
-```php5
-//  oauth
-$storeHash = "afw2w";
-$accessToken = "xxxxxxxxxxxxxxxxxxxxx";
-$products = Bigcommerce::setStoreHash($storeHash)->setAccessToken($accessToken)->getProducts();
-
-//Basic Auth
-$products = Bigcommerce::getProducts();
-```
-
-
-## Paging and Filtering
-
-All the default collection methods support paging, by passing the page number to the method as an integer:
-
-$products = Bigcommerce::getProducts(3);
-
-If you require more specific numbering and paging, you can explicitly specify a limit parameter:
-
-```php5
-$filter = array("page" => 3, "limit" => 30);
-
-$products = Bigcommerce::getProducts($filter);
-```
-
-To filter a collection, you can also pass parameters to filter by as key-value pairs:
-
-```php5
-$filter = array("is_featured" => true);
-
-$featured = Bigcommerce::getProducts($filter);
-```
-
-See the API documentation for each resource for a list of supported filter parameters.
-
-Updating existing resources (PUT)
-
-To update a single resource:
-
-```php5
-$product = Bigcommerce::getProduct(11);
-
-$product->name = "MacBook Air";
-$product->price = 99.95;
-$product->update();
-```
-
-For more info on the Bigcommerce Collection check [this](https://packagist.org/packages/bigcommerce/api)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+[0]: https://ngrok.com
+[1]: https://github.com/bigcommerce/bigcommerce-api-php

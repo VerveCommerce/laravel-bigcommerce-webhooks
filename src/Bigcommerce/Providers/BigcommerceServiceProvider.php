@@ -1,9 +1,9 @@
 <?php
 
-namespace Oseintow\Bigcommerce;
+namespace VerveCommerce\Bigcommerce\Providers;
 
-use Config;
 use Illuminate\Support\ServiceProvider;
+use VerveCommerce\Bigcommerce\Bigcommerce;
 
 class BigcommerceServiceProvider extends ServiceProvider
 {
@@ -25,7 +25,7 @@ class BigcommerceServiceProvider extends ServiceProvider
             __DIR__ . '/../config/bigcommerce.php' => config_path('bigcommerce.php'),
         ]);
 
-        $this->app->alias('Bigcommerce', 'Oseintow\Bigcommerce\Facades\Bigcommerce');
+        $this->app->alias('Bigcommerce', 'VerveCommerce\Bigcommerce\Facades\Bigcommerce');
     }
 
     /**
@@ -35,19 +35,8 @@ class BigcommerceServiceProvider extends ServiceProvider
      */
     public function register()
     {
-         $this->app->singleton('bigcommerce', function($app)
-         {
-             return new Bigcommerce();
-         });
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [];
+        $this->app->singleton('bigcommerce', function ($app) {
+            return new Bigcommerce();
+        });
     }
 }

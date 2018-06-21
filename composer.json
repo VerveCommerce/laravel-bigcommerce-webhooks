@@ -1,21 +1,21 @@
 {
-    "name": "oseintow/laravel-bigcommerce",
-    "description": "Laravel bigcommerce package",
-    "license": "MIT",
+    "name": "vervecommerce/laravel-bigcommerce-webhooks",
+    "description": "Package to make developing webhook BigCommerce applications a breeze on Laravel",
+    "license": "GPL",
     "authors": [
         {
-            "name": "michael osei ntow",
-            "email": "oseintow@gmail.com"
+            "name": "Nick Vahalik",
+            "email": "nick@vervecommerce.com"
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "illuminate/support": "^5.4",
+        "php": ">=7.1.0",
+        "illuminate/support": "^5.6",
         "bigcommerce/api": "^3.0"
     },
     "autoload": {
         "psr-4": {
-            "Oseintow\\": "src/"
+            "VerveCommerce\\": "src/"
         }
     },
     "config": {
@@ -24,10 +24,12 @@
      "extra": {
          "laravel": {
              "providers": [
-                 "Oseintow\\Bigcommerce\\BigcommerceServiceProvider"
+                 "VerveCommerce\\Bigcommerce\\Providers\\BigcommerceServiceProvider",
+                 "VerveCommerce\\Bigcommerce\\Providers\\WebhookServiceProvider",
+                 "VerveCommerce\\Bigcommerce\\Providers\\ArtisanServiceProvider"
              ],
              "aliases": {
-                 "Bigcommerce": "Oseintow\\Bigcommerce\\Facades\\Bigcommerce"
+                 "Bigcommerce": "VerveCommerce\\Bigcommerce\\Facades\\BigCommerce"
              }
          }
     }
