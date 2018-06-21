@@ -9,8 +9,8 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "illuminate/support": "^5.4",
+        "php": ">=7.1.0",
+        "illuminate/support": "^5.6",
         "bigcommerce/api": "^3.0"
     },
     "autoload": {
@@ -24,8 +24,9 @@
      "extra": {
          "laravel": {
              "providers": [
-                 "VerveCommerce\\Bigcommerce\\BigcommerceServiceProvider",
-                 "VerveCommerce\\Bigcommerce\\WebhookServiceProvider"
+                 "VerveCommerce\\Bigcommerce\\Providers\\BigcommerceServiceProvider",
+                 "VerveCommerce\\Bigcommerce\\Providers\\WebhookServiceProvider",
+                 "VerveCommerce\\Bigcommerce\\Providers\\ArtisanServiceProvider"
              ],
              "aliases": {
                  "Bigcommerce": "VerveCommerce\\Bigcommerce\\Facades\\BigCommerce"
