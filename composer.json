@@ -1,7 +1,7 @@
 {
     "name": "vervecommerce/laravel-bigcommerce-webhooks",
     "description": "Package to make developing webhook BigCommerce applications a breeze on Laravel",
-    "license": "GPL",
+    "license": "MIT",
     "authors": [
         {
             "name": "Nick Vahalik",
